@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
+import axios from "axios";
 
 const Signup = ({ setFormType, setIsLoading, showToast }) => {
   const [showPassword, setShowPassword] = useState(false);
@@ -9,25 +10,39 @@ const Signup = ({ setFormType, setIsLoading, showToast }) => {
   const onSubmit = async (data) => {
     setIsLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      console.log(data);
-      reset();
-      showToast("Account created successfully", "success");
-      setFormType("dashboard");
+      // Create FormData to send file + other inputs
+      const formData = new FormData();
+      for (const key in data) {
+        formData.append(key, data[key]);
+      }
+  
+      // Send POST request to your backend
+      const res = await axios.post("http://localhost:5000/api/auth/signup", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      });
+  
+      reset(); // clears form
+      showToast(res.data.message || "Account created successfully", "success");
+      setFormType("dashboard"); // redirect or show next screen
     } catch (error) {
-      showToast("Error creating account", "error");
+      console.error(error);
+      const msg = error.response?.data?.message || "Error creating account";
+      showToast(msg, "error");
     }
     setIsLoading(false);
   };
+  
 
-  const handleProfilePicture = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setProfilePreview(reader.result);
-      reader.readAsDataURL(file);
-    }
-  };
+  // const handleProfilePicture = (e) => {
+  //   const file = e.target.files?.[0];
+  //   if (file) {
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => setProfilePreview(reader.result);
+  //     reader.readAsDataURL(file);
+  //   }
+  // };
 
   return (
     <div className="w-full max-w-lg mx-auto bg-white p-8 rounded-lg shadow-lg">
@@ -85,7 +100,7 @@ const Signup = ({ setFormType, setIsLoading, showToast }) => {
           <input type="number" placeholder="Annual Income" className="w-full px-4 py-2 border rounded-lg" {...register("annualIncome", { required: "Annual income is required" })} />
           {errors.annualIncome && <p className="text-red-500 text-sm mt-1">{errors.annualIncome.message}</p>}
         </div>
-        <div>
+        {/* <div>
           <label className="flex flex-col items-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer">
             {profilePreview ? <img src={profilePreview} alt="Preview" className="w-24 h-24 object-cover rounded-full" /> : (
               <div className="flex flex-col items-center">
@@ -95,7 +110,7 @@ const Signup = ({ setFormType, setIsLoading, showToast }) => {
             )}
             <input type="file" className="hidden" accept="image/*" onChange={handleProfilePicture} {...register("profilePicture")} />
           </label>
-        </div>
+        </div> */}
         <button type="submit" className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg">Create Account</button>
       </form>
       <p className="text-center mt-6 text-gray-600">
