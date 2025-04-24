@@ -25,7 +25,7 @@ const Signup = ({ setFormType, setIsLoading, showToast }) => {
   
       reset(); // clears form
       showToast(res.data.message || "Account created successfully", "success");
-      setFormType("dashboard"); // redirect or show next screen
+      setFormType("login"); // redirect or show next screen
     } catch (error) {
       console.error(error);
       const msg = error.response?.data?.message || "Error creating account";

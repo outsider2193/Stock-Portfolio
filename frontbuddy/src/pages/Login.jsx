@@ -1,5 +1,7 @@
+import axios from "axios";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
+import { jwtDecode } from "jwt-decode";
 
 const Login = ({ setFormType, setIsLoading, showToast }) => {
   const [showPassword, setShowPassword] = useState(false);
@@ -8,7 +10,12 @@ const Login = ({ setFormType, setIsLoading, showToast }) => {
   const onSubmit = async (data) => {
     setIsLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // await new Promise((resolve) => setTimeout(resolve, 1500));
+      const res = await axios.post("http://localhost:5000/api/auth/login", data)
+      const token = res.data?.token;
+      console.log(token);
+      const decodedToken = jwtDecode(token);
+      console.log(decodedToken)
       showToast("Logged in successfully", "success");
       setFormType("dashboard");
     } catch (error) {
