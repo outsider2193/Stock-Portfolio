@@ -8,7 +8,12 @@ const userSchema = new mongoose.Schema({
   gender: String,
   contactNumber: String,
   jobType: String,
-  annualIncome: Number
+  annualIncome: Number,
+  role: {
+    type: String,
+    enum: ["user", "admin"],
+    default: "user"
+  }
 });
 
 module.exports = mongoose.model('User', userSchema);
