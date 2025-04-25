@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+// const portfolioSchema = require("../models/portfolioModel")
 
 const userSchema = new mongoose.Schema({
   firstName: String,
@@ -13,7 +14,8 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ["user", "admin"],
     default: "user"
-  }
+  },
+  portfolio: { type: mongoose.Schema.Types.ObjectId, ref: "Portfolio" }
 });
 
 module.exports = mongoose.model('User', userSchema);
