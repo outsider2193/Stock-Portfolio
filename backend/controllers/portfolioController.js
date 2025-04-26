@@ -1,4 +1,4 @@
-const portfolio = require("../models/portfolioModel");
+const Portfolio = require("../models/portfolioModel");
 const User = require("../models/UserModel")
 
 const createPortfolio = async (req, res) => {
@@ -7,20 +7,20 @@ const createPortfolio = async (req, res) => {
     try {
         const user = await User.findById(id);
         if (!user) {
-           return  res.status(400).json({ message: "User not found" })
+            return res.status(400).json({ message: "User not found" })
         }
 
-        const existingPortfolio = await portfolio.findOne({ userId: id });
+        const existingPortfolio = await Portfolio.findOne({ userId: id });
         if (existingPortfolio) {
-           return res.status(400).json({ message: "Portfolio already created" })
+            return res.status(400).json({ message: "Portfolio already created" })
         }
 
-        const userPortfolio = new portfolio({
+        const userPortfolio = new Portfolio({
             userId: id,
             cash: 10000,
             stocks: []
         })
-        await userPortfolio.save();
+            (await userPortfolio.save()).populate("stocks");
         user.portfolio = userPortfolio._id;
         await user.save();
         res.status(201).json({ message: "portfolio created:", data: userPortfolio })
@@ -29,8 +29,22 @@ const createPortfolio = async (req, res) => {
         res.status(500).json({ error: "Internal server error" });
     }
 
-
-
 }
+const getPortfolio = async (req, res) => {
+    const { userId } = req.params;
 
-module.exports = { createPortfolio }
+    try {
+        const userPortfolio = await Portfolio.findOne({ userId }).populate("stocks");
+
+        if (!userPortfolio) {
+            return res.status(404).json({ message: "Portfolio not found" });
+        }
+
+        res.status(200).json({ data: userPortfolio });
+    } catch (error) {
+        console.error("Error fetching portfolio:", error.message);
+        res.status(500).json({ error: "Failed to fetch portfolio" });
+    }
+};
+
+module.exports = { createPortfolio, getPortfolio }
