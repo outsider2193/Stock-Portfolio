@@ -1,6 +1,7 @@
 const Stock = require("../models/stockModel");
 const Portfolio = require("../models/portfolioModel");
 const User = require("../models/UserModel");
+const Transaction = require("../models/transactionModel");
 const axios = require("axios")
 require("dotenv").config();
 
@@ -102,17 +103,17 @@ const addStockToPortfolio = async (req, res) => {
             await existingStock.save();
 
         }
-            const stockExists = userPortfolio.stocks.includes(existingStock._id);
-            if (stockExists) {
-                return res.status(400).json({ message: "Stock already in portfolio" });
-            }
+        const stockExists = userPortfolio.stocks.includes(existingStock._id);
+        if (stockExists) {
+            return res.status(400).json({ message: "Stock already in portfolio" });
+        }
 
-            userPortfolio.stocks.push(existingStock._id);
-            await userPortfolio.save()
+        userPortfolio.stocks.push(existingStock._id);
+        await userPortfolio.save()
 
-            const updatedPortfolio = await Portfolio.findOne({ userId }).populate("stocks");
+        const updatedPortfolio = await Portfolio.findOne({ userId }).populate("stocks");
 
-            res.status(200).json({ message: "Stock added", data: updatedPortfolio });
+        res.status(200).json({ message: "Stock added", data: updatedPortfolio });
 
 
     } catch (error) {
@@ -122,19 +123,33 @@ const addStockToPortfolio = async (req, res) => {
 }
 
 
-const buyStocks = async (req, res) => {
-    const { id } = req.params;
+const buyStock = async (req, res) => {
+    const { userId } = req.params;
     const { symbol, quantity } = req.body;
     const api_key = process.env.API_KEY;
 
     if (!symbol || !quantity || quantity <= 0) {
         return res.status(400).json({ message: "Invalid input parameters" });
     }
+
     try {
-        const userPortfolio = await Portfolio.findOne({ id }).populate("stocks")
+
+        const userPortfolio = await Portfolio.findOne({ userId });
         if (!userPortfolio) {
-            return res.status(400).json({ message: "user Portfolio not found" });
+            return res.status(404).json({ message: "Portfolio not found" });
         }
+
+
+        let stockInDB = await Stock.findOne({ Symbol: symbol });
+        if (!stockInDB) {
+            return res.status(404).json({ message: "Stock not found. Please add it to your portfolio first." });
+        }
+
+        const stockInPortfolio = userPortfolio.stocks.includes(stockInDB._id);
+        if (!stockInPortfolio) {
+            return res.status(400).json({ message: "Stock not in portfolio. Please add it first." });
+        }
+
 
         const response = await axios.get("https://finnhub.io/api/v1/quote", {
             params: {
@@ -142,22 +157,142 @@ const buyStocks = async (req, res) => {
                 token: api_key
             },
         });
+        const currentPrice = response.data.c;
+        const totalCost = currentPrice * quantity;
+
+        if (userPortfolio.cash < totalCost) {
+            return res.status(400).json({ message: "Insufficient funds" });
+        }
+        const previousTotal = stockInDB.quantity * stockInDB.averagePrice;
+        const newQuantity = stockInDB.quantity + parseInt(quantity);
+        stockInDB.averagePrice = (previousTotal + totalCost) / newQuantity;
+        stockInDB.quantity = newQuantity;
+        stockInDB.high = Math.max(stockInDB.high || 0, response.data.h);
+        stockInDB.low = stockInDB.low ? Math.min(stockInDB.low, response.data.l) : response.data.l;
+        await stockInDB.save();
 
 
+        userPortfolio.cash -= totalCost;
+        await userPortfolio.save();
+
+        const updatedPortfolio = await Portfolio.findOne({ userId }).populate("stocks");
+
+        const transactions = new Transaction({
+            portfolio: userPortfolio._id,
+            type: "buy",
+            symbol: stockInDB.Symbol,
+            quantity: quantity,
+            price: currentPrice,
+            amount: totalCost
+        })
+        await transactions.save();
+
+        res.status(200).json({
+            message: "Stock purchased successfully",
+            portfolio: updatedPortfolio
+        });
 
     } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: "Failed to buy stock " });
+        console.error("Error buying stock:", error.message);
+        res.status(500).json({ error: "Failed to buy stock" });
     }
-}
+};
+
+
+
+const sellStock = async (req, res) => {
+    const { userId } = req.params;
+    const { symbol, quantity } = req.body;
+    const api_key = process.env.API_KEY;
+
+
+    const qty = parseInt(quantity);
+    if (!symbol || isNaN(qty) || qty <= 0) {
+        return res.status(400).json({ message: "Invalid input parameters" });
+    }
+
+    try {
+
+        const userPortfolio = await Portfolio.findOne({ userId });
+        if (!userPortfolio) {
+            return res.status(404).json({ message: "Portfolio not found" });
+        }
+
+
+        let stockInDB = await Stock.findOne({ Symbol: symbol });
+        if (!stockInDB) {
+            return res.status(404).json({ message: "Stock not found in system." });
+        }
+
+
+        const stockInPortfolio = userPortfolio.stocks.some(stockId => stockId.equals(stockInDB._id));
+        if (!stockInPortfolio) {
+            return res.status(400).json({ message: "Stock not in your portfolio" });
+        }
+
+
+        if (stockInDB.quantity < qty) {
+            return res.status(400).json({ message: "Not enough stock quantity to sell" });
+        }
+
+
+        const response = await axios.get("https://finnhub.io/api/v1/quote", {
+            params: {
+                symbol,
+                token: api_key
+            },
+        });
+        const currentPrice = response.data.c;
+
+        if (!currentPrice || currentPrice <= 0) {
+            return res.status(400).json({ message: "Invalid stock price received from API." });
+        }
+
+
+        const totalSaleValue = currentPrice * qty;
+
+        stockInDB.quantity -= qty;
+
+
+        // if (stockInDB.quantity === 0) {
+
+        //     userPortfolio.stocks = userPortfolio.stocks.filter(stockId => !stockId.equals(stockInDB._id));
+        //     await stockInDB.deleteOne(); 
+        // } else {
+        //     await stockInDB.save(); 
+        // }
+
+
+        userPortfolio.cash += totalSaleValue;
+        await userPortfolio.save();
+
+
+        const updatedPortfolio = await Portfolio.findOne({ userId }).populate("stocks");
+
+        const transactions = new Transaction({
+            portfolio: userPortfolio._id,
+            type: "sell",
+            symbol: stockInDB.Symbol,
+            quantity: quantity,
+            price: currentPrice,
+            amount: totalCost
+        })
+        await transactions.save();
+
+
+        res.status(200).json({
+            message: "Stock sold successfully",
+            portfolio: updatedPortfolio
+        });
+
+    } catch (error) {
+        console.error("Error selling stock:", error.message);
+        res.status(500).json({ error: "Failed to sell stock" });
+    }
+};
 
 
 
 
 
-
-
-
-
-
-module.exports = { getStocksByApi, addStockToPortfolio }
+module.exports = { getStocksByApi, addStockToPortfolio, buyStock, sellStock }
