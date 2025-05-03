@@ -5,43 +5,6 @@ const Transaction = require("../models/transactionModel");
 const axios = require("axios")
 require("dotenv").config();
 
-// const createStock = async (req, res) => {
-
-//     try {
-//         const { name, symbol, company, sector, price, volume, marketCap, signal } = req.body;
-
-//         if (!["sell", "buy", "hold"].includes(signal)) {
-//             res.status(400).json({ message: "invalid input" })
-//         }
-//         const stocks = new Stock({
-//             name,
-//             symbol,
-//             company,
-//             sector,
-//             price,
-//             volume,
-//             marketCap,
-//             signal
-//         })
-//         await stocks.save();
-//         res.status(201).json({ message: "Stocks created" })
-//     } catch (error) {
-//         console.log(error);
-//         res.status(500).json({ message: "Internal server error" })
-//     }
-// }
-
-// const getStocksByCompanyId = async (req, res) => {
-//     const { id } = req.params;
-
-//     try {
-//         const stocksByCompany = await Stock.find({ company: id })
-//         res.status(200).json({ message: "Stocks fetched", data: stocksByCompany })
-//     } catch (error) {
-//         console.log(error);
-//         res.status(500).json({ message: "Internal server error" })
-//     }
-// }
 
 const getStocksByApi = async (req, res) => {
     const symbols = ["AAPL", "GOOGL", "MSFT", "AMZN", "TSLA", "NFLX", "META", "NVDA", "BABA", "DIS"];
@@ -120,7 +83,64 @@ const addStockToPortfolio = async (req, res) => {
         console.error("Error adding stock to portfolio:", error.message);
         res.status(500).json({ error: "Failed to add stock to portfolio" });
     }
-}
+};
+
+const searchStockBySymbol = async (req, res) => {
+    const { symbol } = req.query;
+    const api_key = process.env.API_KEY;
+
+    if (!symbol) {
+        return res.status(400).json({ error: "Symbol is required" });
+    }
+
+    try {
+        const response = await axios.get("https://finnhub.io/api/v1/quote", {
+            params: {
+                symbol,
+                token: api_key
+            }
+        });
+
+        const stockData = {
+            symbol,
+            currentPrice: response.data.c,
+            high: response.data.h,
+            low: response.data.l,
+            previousClose: response.data.pc
+        };
+
+        res.status(200).json({ message: "Stock fetched successfully", data: stockData });
+    } catch (error) {
+        console.error("Error fetching stock:", error.message);
+        res.status(500).json({ error: "Failed to fetch stock data" });
+    }
+};
+
+const searchStockSuggestions = async (req, res) => {
+    const { query } = req.query;
+    const api_key = process.env.API_KEY;
+  
+    if (!query) {
+      return res.status(400).json({ error: "Query is required" });
+    }
+  
+    try {
+      const response = await axios.get("https://finnhub.io/api/v1/search", {
+        params: {
+          q: query,
+          token: api_key,
+        },
+      });
+  
+      const topSuggestions = response.data.result.slice(0, 5).map((item) => item.symbol);
+      res.status(200).json({ suggestions: topSuggestions });
+      
+    } catch (error) {
+      console.error("Error fetching suggestions:", error.message);
+      res.status(500).json({ error: "Failed to fetch suggestions" });
+    }
+  };
+  
 
 
 const buyStock = async (req, res) => {
@@ -295,4 +315,4 @@ const sellStock = async (req, res) => {
 
 
 
-module.exports = { getStocksByApi, addStockToPortfolio, buyStock, sellStock }
+module.exports = { getStocksByApi, addStockToPortfolio, buyStock, sellStock, searchStockBySymbol, searchStockSuggestions }

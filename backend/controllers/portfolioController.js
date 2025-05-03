@@ -20,7 +20,7 @@ const createPortfolio = async (req, res) => {
             cash: 10000,
             stocks: []
         })
-            (await userPortfolio.save()).populate("stocks");
+            await userPortfolio.save();
         user.portfolio = userPortfolio._id;
         await user.save();
         res.status(201).json({ message: "portfolio created:", data: userPortfolio })

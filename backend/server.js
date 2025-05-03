@@ -18,7 +18,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/company", companyRoutes);
 app.use("/stocks", stockRoutes);
-app.use("/portfolio", portfolioRoutes)
+app.use("/portfolio", portfolioRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

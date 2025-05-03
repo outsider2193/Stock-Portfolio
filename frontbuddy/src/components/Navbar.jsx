@@ -1,33 +1,35 @@
 import React from "react";
+import { AppBar, Box, Toolbar, Typography, Button } from "@mui/material";
 import { FaSignOutAlt } from "react-icons/fa";
 
-const Navbar = ({ userProfile, onLogout }) => (
-  <nav className="bg-white shadow-lg">
-    <div className="max-w-7xl mx-auto px-4">
-      <div className="flex justify-between h-16 items-center">
-        <div className="flex items-center">
-          <span className="text-xl font-bold text-gray-800">Investment Dashboard</span>
-        </div>
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
-            <img
-              src="https://via.placeholder.com/40?text=Profile"
-              alt="Profile"
-              className="h-10 w-10 rounded-full"
-            />
-            <span className="text-gray-700">{userProfile.name}</span>
-          </div>
-          <button
+const Navbar = ({ userProfile, onLogout }) => {
+  return (
+    <AppBar
+      position="static"
+      color="default"
+      elevation={1}
+      sx={{ mb: 3 }} // margin-bottom
+    >
+      <Toolbar sx={{ justifyContent: "space-between" }}>
+        <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
+          Investment Dashboard
+        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+            {userProfile?.firstName}
+          </Typography>
+          <Button
+            variant="contained"
+            color="error"
+            startIcon={<FaSignOutAlt />}
             onClick={onLogout}
-            className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 flex items-center space-x-2"
           >
-            <FaSignOutAlt />
-            <span>Logout</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </nav>
-);
+            Logout
+          </Button>
+        </Box>
+      </Toolbar>
+    </AppBar>
+  );
+};
 
 export default Navbar;

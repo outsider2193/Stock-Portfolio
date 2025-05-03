@@ -19,6 +19,7 @@ import {
   FileSpreadsheet,
   Eye,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const LandingPage = ({ setFormType }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -32,6 +33,9 @@ const LandingPage = ({ setFormType }) => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const navigate = useNavigate();
+
 
   // Animation variants
   const fadeIn = {
@@ -65,7 +69,7 @@ const LandingPage = ({ setFormType }) => {
                 onClick={() => setFormType("landing")}
                 className="text-2xl font-heading font-bold text-white"
               >
-            portfoli buddy
+            Portfolio Buddy
               </button>
             </div>
 
@@ -84,13 +88,13 @@ const LandingPage = ({ setFormType }) => {
                 Pricing
               </a>
               <button
-                onClick={() => setFormType("login")}
+                onClick={() => navigate("/login")}
                 className="text-teal-400 font-medium hover:text-teal-300 transition-colors"
               >
                 Login
               </button>
               <motion.button
-                onClick={() => setFormType("signup")}
+                onClick={() => navigate("/signup")}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="bg-teal-500 text-white px-4 py-2 rounded-md font-medium hover:bg-teal-400 transition-colors"
@@ -142,7 +146,7 @@ const LandingPage = ({ setFormType }) => {
                     Testimonials
                   </a>
                   <a
-                    href="#pricing"
+                    href="#pricing" 
                     className="text-gray-300 hover:text-teal-400 transition-colors py-2"
                     onClick={() => setIsOpen(false)}
                   >
@@ -200,7 +204,7 @@ const LandingPage = ({ setFormType }) => {
               variants={fadeIn}
             >
               <motion.button
-                onClick={() => setFormType("signup")}
+                onClick={() => navigate("/signup")}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="bg-teal-500 text-white px-8 py-3 rounded-md font-medium hover:bg-teal-400 transition-all shadow-md"
@@ -464,7 +468,7 @@ const LandingPage = ({ setFormType }) => {
                 "Daily market updates",
               ]}
               buttonText="Get Started"
-              buttonAction={() => setFormType("signup")}
+              buttonAction={() => navigate("/signup")}
               highlighted={false}
               delay={0}
             />
@@ -481,7 +485,7 @@ const LandingPage = ({ setFormType }) => {
                 "Priority support",
               ]}
               buttonText="Start Trial"
-              buttonAction={() => setFormType("signup")}
+              buttonAction={() => navigate("/signup")}
               highlighted={true}
               delay={0.1}
             />
@@ -498,7 +502,7 @@ const LandingPage = ({ setFormType }) => {
                 "Exclusive insights",
               ]}
               buttonText="Start Trial"
-              buttonAction={() => setFormType("signup")}
+              buttonAction={() => navigate("/signup")}
               highlighted={false}
               delay={0.2}
             />
@@ -524,7 +528,7 @@ const LandingPage = ({ setFormType }) => {
             </p>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <button
-                onClick={() => setFormType("signup")}
+                onClick={() => navigate("/signup")}
                 className="bg-teal-500 text-white px-8 py-3 rounded-md font-medium hover:bg-teal-400 transition-colors inline-block"
               >
                 Start Free Trial

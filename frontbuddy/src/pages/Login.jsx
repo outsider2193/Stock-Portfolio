@@ -2,27 +2,40 @@ import axios from "axios";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { jwtDecode } from "jwt-decode";
+import { useNavigate } from "react-router-dom";
 
-const Login = ({ setFormType, setIsLoading, showToast }) => {
+const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [toast, setToast] = useState({ show: false, message: "", type: "" });
   const { register, handleSubmit, formState: { errors } } = useForm();
+  const navigate = useNavigate();
+
+  const showToast = (message, type) => {
+    setToast({ show: true, message, type });
+    setTimeout(() => setToast({ ...toast, show: false }), 3000);
+  };
 
   const onSubmit = async (data) => {
-    setIsLoading(true);
     try {
-      // await new Promise((resolve) => setTimeout(resolve, 1500));
       const res = await axios.post("http://localhost:5000/api/auth/login", data)
       const token = res.data?.token;
-      console.log(token);
-      const decodedToken = jwtDecode(token);
-      console.log(decodedToken)
-      showToast("Logged in successfully", "success");
-      setFormType("dashboard");
+
+      if(token){
+        localStorage.setItem("token", token);
+        console.log(token);
+        const decodedToken = jwtDecode(token);
+        console.log(decodedToken)
+        showToast("Logged in successfully", "success");
+        navigate("/dashboard");
+      } else{
+        showToast("No token received", "error");
+      }
+
     } catch (error) {
       showToast("Login failed", "error");
     }
-    setIsLoading(false);
   };
+
 
   return (
     <div className="w-full max-w-md mx-auto bg-white p-8 rounded-lg shadow-lg">
@@ -48,12 +61,12 @@ const Login = ({ setFormType, setIsLoading, showToast }) => {
             <input type="checkbox" className="form-checkbox h-4 w-4 text-blue-600" />
             <span className="ml-2 text-gray-600">Remember me</span>
           </label>
-          <button type="button" onClick={() => setFormType("forgot")} className="text-blue-600 hover:text-blue-800 text-sm">Forgot Password?</button>
+          <button type="button" onClick={() => navigate("/forgot-password")} className="text-blue-600 hover:text-blue-800 text-sm">Forgot Password?</button>
         </div>
         <button type="submit" className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg">Sign in</button>
       </form>
       <p className="text-center mt-6 text-gray-600">
-        Don't have an account? <button onClick={() => setFormType("signup")} className="text-blue-600 hover:text-blue-800">Sign up</button>
+        Don't have an account? <button onClick={() => navigate("/signup")} className="text-blue-600 hover:text-blue-800">Sign up</button>
       </p>
     </div>
   );
