@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
+import { ToastContainer, toast } from "react-toastify";
 import { jwtDecode } from "jwt-decode";
-import axios from "../api/axios"; // your custom axios with token interceptor
+import axios from "../api/axios"; 
 import {
   Button,
   TextField,
@@ -37,9 +38,9 @@ const Portfolio = () => {
     try {
       const res = await axios.post(`/portfolio/create/${userId}`);
       setPortfolio(res.data.data);
-      setMessage("Portfolio created!");
+      toast.success("Portfolio created!");
     } catch (err) {
-      setMessage(err.response?.data?.message || "Portfolio already exists");
+      toast.error(err.response?.data?.message || "Portfolio already exists");
     }
   };
 
@@ -47,14 +48,16 @@ const Portfolio = () => {
     setLoading(true);
     try {
       const endpoint = action === "buy" ? "buystocks" : "sellstocks";
-      const res = await axios.post(`/portfolio/${endpoint}/${userId}`, {
+      const res = await axios.post(`/stocks/${endpoint}/${userId}`, {
         symbol,
         quantity,
       });
       setPortfolio(res.data.portfolio);
-      setMessage(`Stock ${action}ed successfully`);
+      toast.success(`Stock ${action.charAt(0).toUpperCase() + action.slice(1)}ed successfully`);
+      setSymbol("");
+      setQuantity(1); 
     } catch (err) {
-      setMessage(err.response?.data?.message || `Failed to ${action} stock`);
+      toast.error(err.response?.data?.message || `Failed to ${action} stock`);
     }
     setLoading(false);
   };
@@ -65,6 +68,7 @@ const Portfolio = () => {
 
   return (
     <Box p={3}>
+      <ToastContainer position="top-right" autoClose={3000} />
       <Typography variant="h4" gutterBottom>
         Your Portfolio
       </Typography>
@@ -112,27 +116,28 @@ const Portfolio = () => {
             </Grid>
             <Grid item xs={12} md={6}>
               <Button
-                variant="contained"
+                variant={action === "buy" ? "contained" : "outlined"}
                 color="primary"
                 onClick={() => setAction("buy")}
                 disabled={action === "buy"}
+                sx={{ mr: 2 }}
               >
                 Buy
               </Button>
               <Button
-                variant="contained"
+                variant={action === "sell" ? "contained" : "outlined"}
                 color="secondary"
-                sx={{ ml: 2 }}
                 onClick={() => setAction("sell")}
                 disabled={action === "sell"}
+                sx={{ mr: 2 }}
               >
                 Sell
               </Button>
               <Button
-                variant="outlined"
-                sx={{ ml: 2 }}
+                variant="contained"
+                color="success"
                 onClick={handleTransaction}
-                disabled={loading || !symbol || quantity <= 0}
+                disabled={!action || loading || !symbol || quantity <= 0}
               >
                 Confirm {action}
               </Button>

@@ -272,6 +272,7 @@ const sellStock = async (req, res) => {
         const totalSaleValue = currentPrice * qty;
 
         stockInDB.quantity -= qty;
+        await stockInDB.save(); 
 
 
         // if (stockInDB.quantity === 0) {
@@ -295,7 +296,7 @@ const sellStock = async (req, res) => {
             symbol: stockInDB.Symbol,
             quantity: quantity,
             price: currentPrice,
-            amount: totalCost
+            amount: totalSaleValue
         })
         await transactions.save();
 

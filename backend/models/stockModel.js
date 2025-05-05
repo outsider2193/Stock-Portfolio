@@ -15,7 +15,7 @@ const mongoose = require("mongoose");
 const stockSchema = new mongoose.Schema({
     Symbol: { type: String, required: true, unique: true },
     quantity: { type: Number, default: 0 },
-    averagePrice: { type: Number },
+    averagePrice: { type: Number, default: 0 },
     high: { type: Number },
     low: { type: Number },
     signal: {

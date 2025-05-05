@@ -26,8 +26,8 @@ const Sidebar = ({ activeView, setActiveView }) => {
     { id: "overview", label: "Overview", icon: <FaHome /> },
     { id: "stocks", label: "Stocks", icon: <FaChartLine /> },
     { id: "portfolio", label: "Portfolio", icon: <FaBriefcase /> },
-    { id: "companies", label: "Companies", icon: <FaBuilding /> },
-    { id: "subscriptions", label: "Subscriptions", icon: <FaCreditCard /> },
+    // { id: "companies", label: "Companies", icon: <FaBuilding /> },
+    // { id: "subscriptions", label: "Subscriptions", icon: <FaCreditCard /> },
     { id: "profile", label: "Profile", icon: <FaUser /> },
     { id: "settings", label: "Settings", icon: <FaCog /> },
   ];

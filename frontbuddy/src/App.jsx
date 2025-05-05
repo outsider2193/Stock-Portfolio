@@ -6,9 +6,12 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ChangePassword from "./pages/ChangePassword";
 import Dashboard from "./pages/Dashboard";
 import LandingPage from "./LandingPage";
+import { ToastContainer } from "react-toastify";
 
 const App = () => {
   return (
+    <>
+    <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/signup" element={<Signup />} />
@@ -19,6 +22,7 @@ const App = () => {
         {/* If user enters wrong URL, redirect to LandingPage */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
+      </>
   );
 };
 

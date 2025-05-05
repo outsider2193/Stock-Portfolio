@@ -1,9 +1,9 @@
 const express = require("express");
-const { signup, loginUser } = require("../controllers/AuthController");
+const { signup, loginUser, updateuserProfile, updateuserPassword, getUsersById } = require("../controllers/AuthController");
 const multer = require("multer");
+const { verifyToken, authorizedRoles } = require("../middleware/authMiddleware");
 const router = express.Router();
 
-// File upload config
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, "uploads/"),
   filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname)
@@ -11,6 +11,9 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 router.post("/signup", upload.none(), signup);
-router.post("/login", loginUser)
+router.post("/login", loginUser);
+router.get("/user/:id", verifyToken, authorizedRoles("user"), getUsersById);
+router.put("/updateuserprofile/:id", verifyToken, authorizedRoles("user"), updateuserProfile);
+router.put("/updateuserpassword/:id", verifyToken, authorizedRoles("user"), updateuserPassword);
 
 module.exports = router;

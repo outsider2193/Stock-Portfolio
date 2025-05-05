@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const Signup = ({ setFormType, setIsLoading, showToast }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [profilePreview, setProfilePreview] = useState("");
   const { register, handleSubmit, formState: { errors }, reset } = useForm();
+
+  const navigate = useNavigate();
 
   const onSubmit = async (data) => {
     setIsLoading(true);
@@ -47,7 +50,7 @@ const Signup = ({ setFormType, setIsLoading, showToast }) => {
   return (
     <div className="w-full max-w-lg mx-auto bg-white p-8 rounded-lg shadow-lg">
       <div className="text-center mb-8">
-        <img src="https://readdy.ai/api/search-image?query=modern minimalist company logo design with abstract shapes in blue and gray colors on pure white background professional corporate identity&width=120&height=120&seq=1&orientation=squarish" alt="Logo" className="mx-auto h-16 mb-4" />
+        {/* <img src="https://readdy.ai/api/search-image?query=modern minimalist company logo design with abstract shapes in blue and gray colors on pure white background professional corporate identity&width=120&height=120&seq=1&orientation=squarish" alt="Logo" className="mx-auto h-16 mb-4" /> */}
         <h2 className="text-3xl font-bold text-gray-800">Create Account</h2>
         <p className="text-gray-600 mt-2">Join our community today</p>
       </div>
@@ -114,7 +117,7 @@ const Signup = ({ setFormType, setIsLoading, showToast }) => {
         <button type="submit" className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg">Create Account</button>
       </form>
       <p className="text-center mt-6 text-gray-600">
-        Already have an account? <button onClick={() => setFormType("login")} className="text-blue-600 hover:text-blue-800">Login</button>
+        Already have an account? <button onClick={() => navigate("/login")} className="text-blue-600 hover:text-blue-800">Login</button>
       </p>
     </div>
   );

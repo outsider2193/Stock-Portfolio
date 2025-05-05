@@ -84,9 +84,9 @@ const LandingPage = ({ setFormType }) => {
               <a href="#testimonials" className="text-gray-300 hover:text-teal-400 transition-colors">
                 Testimonials
               </a>
-              <a href="#pricing" className="text-gray-300 hover:text-teal-400 transition-colors">
+              {/* <a href="#pricing" className="text-gray-300 hover:text-teal-400 transition-colors">
                 Pricing
-              </a>
+              </a> */}
               <button
                 onClick={() => navigate("/login")}
                 className="text-teal-400 font-medium hover:text-teal-300 transition-colors"
@@ -145,13 +145,13 @@ const LandingPage = ({ setFormType }) => {
                   >
                     Testimonials
                   </a>
-                  <a
+                  {/* <a
                     href="#pricing" 
                     className="text-gray-300 hover:text-teal-400 transition-colors py-2"
                     onClick={() => setIsOpen(false)}
                   >
                     Pricing
-                  </a>
+                  </a> */}
                   <button
                     onClick={() => {
                       setFormType("login");
@@ -211,14 +211,14 @@ const LandingPage = ({ setFormType }) => {
               >
                 Get Started
               </motion.button>
-              <motion.a
+              {/* <motion.a
                 href="#demo"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="bg-transparent border border-white text-white px-8 py-3 rounded-md font-medium hover:bg-white hover:text-blue-900 transition-all flex items-center justify-center gap-2"
               >
                 <Play size={16} /> Watch Demo
-              </motion.a>
+              </motion.a> */}
             </motion.div>
           </motion.div>
         </div>
@@ -327,14 +327,14 @@ const LandingPage = ({ setFormType }) => {
                 />
               </div>
 
-              <motion.a
+              {/* <motion.a
                 href="#demo-request"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="mt-8 bg-teal-500 text-white px-6 py-3 rounded-md font-medium hover:bg-teal-400 transition-all flex items-center gap-2"
               >
                 Request Demo <ChevronRight size={16} />
-              </motion.a>
+              </motion.a> */}
             </motion.div>
 
             <motion.div
@@ -444,7 +444,7 @@ const LandingPage = ({ setFormType }) => {
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="py-20 bg-gray-100">
+      {/* <section id="pricing" className="py-20 bg-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             className="text-center mb-16"
@@ -508,7 +508,7 @@ const LandingPage = ({ setFormType }) => {
             />
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Final CTA Section */}
       <section className="py-20 bg-gradient-to-br from-blue-900 to-teal-600 text-white">
