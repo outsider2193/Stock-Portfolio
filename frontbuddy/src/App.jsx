@@ -10,6 +10,7 @@ import { ToastContainer } from "react-toastify";
 import AdminDashboard from "./components/admin/AdminDashboard";
 import UserList from "./components/admin/UserList";
 import UserTransactions from "./components/admin/UserTransactions";
+import ResetPassword from "./pages/ResetPassword";
 
 const App = () => {
   return (
@@ -27,6 +28,7 @@ const App = () => {
         <Route path="/admin/dashboard" element={<AdminDashboard />}/>
         <Route path="/admin/dashboard/users" element={<UserList/>}/>
         <Route path="/admin/dashboard/transactions" element={<UserTransactions/>}/>
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
           
       </Routes>
     </>

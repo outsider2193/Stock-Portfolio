@@ -1,5 +1,5 @@
 const express = require("express");
-const { signup, loginUser, updateuserProfile, updateuserPassword, getUsersById } = require("../controllers/AuthController");
+const { signup, loginUser, updateuserProfile, updateuserPassword, getUsersById, resetPassword, forgotPassword } = require("../controllers/AuthController");
 const multer = require("multer");
 const { verifyToken, authorizedRoles } = require("../middleware/authMiddleware");
 const router = express.Router();
@@ -15,5 +15,7 @@ router.post("/login", loginUser);
 router.get("/user/:id", verifyToken, authorizedRoles("user"), getUsersById);
 router.put("/updateuserprofile/:id", verifyToken, authorizedRoles("user"), updateuserProfile);
 router.put("/updateuserpassword/:id", verifyToken, authorizedRoles("user"), updateuserPassword);
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password/:token", resetPassword);
 
 module.exports = router;
