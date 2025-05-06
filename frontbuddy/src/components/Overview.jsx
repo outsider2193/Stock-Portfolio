@@ -1,122 +1,89 @@
-import React, { useEffect, useState } from "react";
-import { Box, Paper, Typography, Grid, CircularProgress } from "@mui/material";
-import axios from "../api/axios";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
-import { jwtDecode } from "jwt-decode";
+import React, { useEffect, useState } from "react"; 
+import { usePortfolio } from "../components/PortfolioContext"; // Context hook for portfolio data
+import { Typography, Card, CardContent, Box, Divider } from "@mui/material";
+import { Line } from "react-chartjs-2"; // Import chart.js line chart
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from "chart.js";
+
+// Register ChartJS components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 const Overview = () => {
-  const token = localStorage.getItem("token");
-  const decoded = jwtDecode(token);
-  const userId = decoded.id;
-
-  const [portfolio, setPortfolio] = useState(null); // Portfolio will now be an object, not an array
-  const [loading, setLoading] = useState(true);
-  const [chartData, setChartData] = useState([]);
+  const { portfolio, calculatePortfolioValues } = usePortfolio();
+  const [totalValue, setTotalValue] = useState(0);
+  const [score, setScore] = useState(0);
+  const [activeHoldings, setActiveHoldings] = useState(0);
+  const [chartData, setChartData] = useState({
+    labels: [], // For storing time-based labels (e.g., dates or intervals)
+    datasets: [
+      {
+        label: "Portfolio Value",
+        data: [], // Store portfolio values
+        borderColor: "rgba(75, 192, 192, 1)", // Line color
+        backgroundColor: "rgba(75, 192, 192, 0.2)", // Area color under the line
+        fill: true,
+        tension: 0.1, // Makes the line curve
+      },
+      {
+        label: "Portfolio Score",
+        data: [], // Store portfolio scores
+        borderColor: "rgba(255, 99, 132, 1)", // Line color
+        backgroundColor: "rgba(255, 99, 132, 0.2)", // Area color under the line
+        fill: true,
+        tension: 0.1, // Makes the line curve
+      },
+    ],
+  });
 
   useEffect(() => {
-    const fetchPortfolio = async () => {
-      try {
-        const res = await axios.get(`/portfolio/fetchportfolio/${userId}`);
-        console.log("Portfolio Response Data:", res.data); // Log the full response
-  
-        // Access the nested 'data' property from the response
-        const portfolioData = res.data.data; // Access 'data' directly here
-        if (portfolioData && Array.isArray(portfolioData.stocks)) {
-          setPortfolio(portfolioData); // Set portfolio data if stocks is an array
-          generateChartData(portfolioData.stocks); // Generate chart data from stocks
-        } else {
-          console.error("Stocks data is not an array", portfolioData.stocks);
-          setPortfolio({ stocks: [] }); // Handle case where stocks data is missing or not an array
-        }
-      } catch (err) {
-        console.error("Error fetching portfolio", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-  
-    fetchPortfolio();
-  }, [userId]);
-  
-  
-  const generateChartData = (stocks) => {
-    if (Array.isArray(stocks)) {
-      const chartPoints = stocks.map(stock => ({
-        name: stock.symbol,
-        value: stock.currentPrice * stock.quantity,
+    if (portfolio) {
+      const { totalValue, score, activeHoldings } = calculatePortfolioValues();
+      setTotalValue(totalValue);
+      setScore(score);
+      setActiveHoldings(activeHoldings);
+
+      // Updating chart data based on portfolio values and scores
+      setChartData((prevData) => ({
+        ...prevData,
+        labels: [...prevData.labels, new Date().toLocaleString()], // Add timestamp as label
+        datasets: prevData.datasets.map((dataset, index) => {
+          // Update the appropriate dataset (value or score)
+          const newData = index === 0 ? totalValue : score;
+          dataset.data = [...dataset.data, newData]; // Add the new value
+          return dataset;
+        }),
       }));
-      setChartData(chartPoints);
-    } else {
-      console.error("Stocks is not an array", stocks);
     }
-  };
-
-  if (loading) {
-    return <Box sx={{ p: 4 }}><CircularProgress /></Box>;
-  }
-
-  // Calculate total current value and total investment using the stocks array
-  const totalCurrentValue = Array.isArray(portfolio.stocks) && portfolio.stocks.length > 0
-    ? portfolio.stocks.reduce(
-        (acc, stock) => acc + stock.currentPrice * stock.quantity,
-        0
-      )
-    : 0;
-
-  const totalInvestment = Array.isArray(portfolio.stocks) && portfolio.stocks.length > 0
-    ? portfolio.stocks.reduce(
-        (acc, stock) => acc + stock.buyPrice * stock.quantity,
-        0
-      )
-    : 0;
-
-  const gain = totalCurrentValue - totalInvestment;
-  const portfolioScore = totalInvestment > 0
-    ? ((gain / totalInvestment) * 100).toFixed(2)
-    : 0;
+  }, [portfolio]);
 
   return (
-    <Box sx={{ p: 4 }}>
-      <Typography variant="h4" fontWeight="bold" gutterBottom>
-        Dashboard Overview
+    <Box p={3}>
+      <Typography variant="h4" gutterBottom>
+        Portfolio Overview
       </Typography>
 
-      <Grid container spacing={3} mb={4}>
-        <Grid item xs={12} md={4}>
-          <Paper elevation={3} sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>Portfolio Score</Typography>
-            <Typography variant="h4" color="primary">
-              {portfolioScore}%
-            </Typography>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <Paper elevation={3} sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>Active Portfolios</Typography>
-            <Typography variant="h4">{portfolio.stocks.length}</Typography>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <Paper elevation={3} sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>Total Value</Typography>
-            <Typography variant="h4">${totalCurrentValue.toFixed(2)}</Typography>
-          </Paper>
-        </Grid>
-      </Grid>
+      <Card sx={{ mb: 3 }}>
+        <CardContent>
+          <Typography variant="h6">Total Portfolio Value: ${totalValue.toFixed(2)}</Typography>
+          <Typography variant="h6">Portfolio Score: {score.toFixed(2)}</Typography>
+          <Typography variant="h6">Active Holdings: {activeHoldings}</Typography>
+        </CardContent>
+      </Card>
 
-      <Paper elevation={3} sx={{ p: 3 }}>
-        <Typography variant="h6" gutterBottom>
-          Performance Trend
-        </Typography>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={chartData}>
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Line type="monotone" dataKey="value" stroke="#1976d2" />
-          </LineChart>
-        </ResponsiveContainer>
-      </Paper>
+      {/* Chart Component */}
+      <Card>
+        <CardContent>
+          <Typography variant="h6">Portfolio Value and Score Trend</Typography>
+          <Line data={chartData} options={{ responsive: true, maintainAspectRatio: false }} />
+        </CardContent>
+      </Card>
     </Box>
   );
 };

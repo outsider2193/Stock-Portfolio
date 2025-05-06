@@ -52,23 +52,32 @@ const Portfolio = () => {
         symbol,
         quantity,
       });
-      setPortfolio(res.data.portfolio);
-      toast.success(`Stock ${action.charAt(0).toUpperCase() + action.slice(1)}ed successfully`);
+  
+      // Only update if the backend confirms successful transaction
+      if (res.data?.portfolio) {
+        setPortfolio(res.data.portfolio);
+        toast.success(`Stock ${action.charAt(0).toUpperCase() + action.slice(1)}ed successfully`);
+      }
+  
       setSymbol("");
-      setQuantity(1); 
+      setQuantity(1);
     } catch (err) {
       toast.error(err.response?.data?.message || `Failed to ${action} stock`);
+  
+      // 🔄 Refetch portfolio to sync with actual state
+      await fetchPortfolio();
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
-
+  
   useEffect(() => {
     fetchPortfolio();
   }, []);
 
   return (
     <Box p={3}>
-      <ToastContainer position="top-right" autoClose={3000} />
+      <ToastContainer position="top-center" autoClose={3000} />
       <Typography variant="h4" gutterBottom>
         Your Portfolio
       </Typography>

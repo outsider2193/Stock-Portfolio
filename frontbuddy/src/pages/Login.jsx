@@ -28,14 +28,26 @@ const Login = () => {
     try {
       const res = await axios.post("http://localhost:5000/api/auth/login", data);
       const token = res.data?.token;
-
+  
       if (token) {
         localStorage.setItem("token", token);
         const decodedToken = jwtDecode(token);
         localStorage.setItem("user", JSON.stringify(decodedToken));
         console.log(decodedToken);
+  
         toast.success("Logged in successfully");
-        navigate("/dashboard");
+  
+        const role = decodedToken.role;
+  
+        // Redirect based on role
+        if (role === "admin") {
+          navigate("/admin/dashboard");
+        } else if (role === "user") {
+          navigate("/dashboard");
+        } else {
+          toast.error("Unrecognized role");
+        }
+  
       } else {
         toast.error("No token received");
       }
@@ -43,6 +55,7 @@ const Login = () => {
       toast.error("Login failed");
     }
   };
+  
 
   return (
     <Container maxWidth="sm">

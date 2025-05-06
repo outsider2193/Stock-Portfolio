@@ -1,9 +1,15 @@
 import React from "react";
 import { AppBar, Box, Toolbar, Typography, Button, Avatar } from "@mui/material";
 import { FaSignOutAlt } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = ({ userProfile, onLogout }) => {
   const user = JSON.parse(localStorage.getItem("user"));
+  const navigate = useNavigate();
+  const handleLogout = () => {
+    localStorage.clear(); // Clear everything from storage
+    navigate("/login");   // Redirect to login page
+  };
 
   const firstLetter = user?.firstName?.charAt(0).toUpperCase();
   return (
@@ -25,7 +31,7 @@ const Navbar = ({ userProfile, onLogout }) => {
             variant="contained"
             color="error"
             startIcon={<FaSignOutAlt />}
-            onClick={onLogout}
+            onClick={handleLogout}
           >
             Logout
           </Button>
