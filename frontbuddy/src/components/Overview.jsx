@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"; 
+import React, { useEffect, useState } from "react";
 import { usePortfolio } from "../components/PortfolioContext"; // Context hook for portfolio data
 import { Typography, Card, CardContent, Box, Divider } from "@mui/material";
 import { Line } from "react-chartjs-2"; // Import chart.js line chart
@@ -56,7 +56,7 @@ const Overview = () => {
         datasets: prevData.datasets.map((dataset, index) => {
           // Update the appropriate dataset (value or score)
           const newData = index === 0 ? totalValue : score;
-          dataset.data = [...dataset.data, newData]; // Add the new value
+          dataset.data = [...dataset.data.slice(-9), newData];
           return dataset;
         }),
       }));
@@ -80,10 +80,48 @@ const Overview = () => {
       {/* Chart Component */}
       <Card>
         <CardContent>
-          <Typography variant="h6">Portfolio Value and Score Trend</Typography>
-          <Line data={chartData} options={{ responsive: true, maintainAspectRatio: false }} />
+          <Typography variant="h6" gutterBottom>
+            Portfolio Value and Score Trend
+          </Typography>
+          <Box sx={{ height: 300 }}>
+            <Line
+              data={chartData}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    suggestedMin: 0,
+                    suggestedMax: Math.max(...chartData.datasets[0].data, 1000), // adjust max scale
+                    ticks: {
+                      callback: function (value) {
+                        return `$${value}`;
+                      },
+                    },
+                  },
+                },
+                plugins: {
+                  legend: {
+                    position: "bottom",
+                    labels: {
+                      boxWidth: 12,
+                    },
+                  },
+                  tooltip: {
+                    callbacks: {
+                      label: function (context) {
+                        return `${context.dataset.label}: ${context.raw}`;
+                      },
+                    },
+                  },
+                },
+              }}
+            />
+          </Box>
         </CardContent>
       </Card>
+
     </Box>
   );
 };
