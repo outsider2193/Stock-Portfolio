@@ -17,14 +17,14 @@ const Navbar = ({ userProfile, onLogout }) => {
       position="static"
       color="default"
       elevation={1}
-      sx={{ mb: 3 }}
+      sx={{ mb: 3, bgcolor: "#0fb5a9" }}
     >
       <Toolbar sx={{ justifyContent: "space-between" }}>
         <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
           Investment Dashboard
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Avatar sx={{ bgcolor: 'primary.main' }}>
+        <Avatar sx={{ bgcolor: '#00e5ff' }}>
             {firstLetter}
           </Avatar>
           <Button

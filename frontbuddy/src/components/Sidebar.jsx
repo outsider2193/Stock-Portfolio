@@ -41,7 +41,7 @@ const Sidebar = ({ activeView, setActiveView }) => {
         [`& .MuiDrawer-paper`]: {
           width: drawerWidth,
           boxSizing: "border-box",
-          backgroundColor: "#1e1e2f",
+          backgroundColor: "#0d3b66",
           color: "#ffffff",
         },
       }}
